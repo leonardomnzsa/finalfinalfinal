@@ -1,0 +1,14 @@
+name: stf_dashboard_env
+channels:
+  - https://repo.anaconda.com/pkgs/snowflake
+  - nodefaults
+dependencies:
+  - python=3.11 # Usando 3.11 conforme a última dica do Snowflake
+  - pip
+  - pandas
+  - openpyxl 
+  - streamlit
+  - altair
+  - bcrypt
+  - openai
+
