@@ -1,0 +1,11 @@
+[theme]
+primaryColor="#E8C061" # Dourado para elementos principais
+backgroundColor="#000000" # Fundo preto
+secondaryBackgroundColor="#1C1C1E" # Fundo secundário ligeiramente mais claro (para cards, etc.)
+textColor="#FFFFFF" # Texto branco
+font="sans serif" # Usaremos CSS para aplicar Montserrat, mas definimos um fallback
+
+[server]
+headless = true
+enableCORS = false
+port = 8501
