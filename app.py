@@ -28,6 +28,125 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# --- Load Data (Moved to Main Scope) ---
+    @st.cache_data
+    def load_data(excel_path):
+        try:
+            df = pd.read_excel(excel_path)
+            # --- Data Cleaning and Preparation (Keep existing logic) ---
+            potential_names = {
+                'Informativo': ['Informativo', 'Numero do informativo', 'Número do Informativo'],
+                'Classe Processo': ['Classe Processo'],
+                'Data Julgamento': ['Data Julgamento', 'Data do Julgamento'],
+                'Título': ['Título', 'Titulo'],
+                'Tese Julgado': ['Tese Julgado', 'Tese do Julgado'],
+                'Resumo': ['Resumo'],
+                'Ramo Direito': ['Ramo Direito', 'Ramo do Direito'],
+                'Matéria': ['Matéria', 'Materia'],
+                'Repercussão Geral': ['Repercussão Geral', 'Repercussao Geral'],
+                'Tema RG': ['Tema RG', 'Tema de RG', 'Tema Repercussão Geral'],
+                'Legislação': ['Legislação', 'Legislacao'],
+                'Notícia Completa': ['Notícia Completa', 'Noticia Completa', 'Notícia completa']
+            }
+            actual_cols = {}
+            missing_essential = []
+            essential_user_cols = ['Classe Processo', 'Data Julgamento', 'Título', 'Tese Julgado', 'Resumo', 'Ramo Direito', 'Matéria', 'Repercussão Geral', 'Notícia Completa']
+            for target_name, possible_names in potential_names.items():
+                found = False
+                for name in possible_names:
+                    if name in df.columns:
+                        actual_cols[target_name] = name
+                        found = True
+                        break
+                if not found:
+                    # If essential, mark as missing, otherwise create empty
+                    if target_name in essential_user_cols:
+                        missing_essential.append(target_name)
+                    df[target_name] = '' # Create empty column
+                elif actual_cols[target_name] != target_name:
+                    # Rename found column to target name
+                    df.rename(columns={actual_cols[target_name]: target_name}, inplace=True)
+            
+            # Check for critical missing columns
+            if 'Data Julgamento' in missing_essential:
+                 raise ValueError("Erro Crítico: Coluna essencial 'Data Julgamento' não encontrada no Excel.")
+            elif missing_essential:
+                 st.warning(f"Aviso: Colunas essenciais não encontradas e criadas vazias: {', '.join(missing_essential)}. Algumas funcionalidades podem ser afetadas.")
+            
+            # Ensure all target columns exist, even if empty
+            user_cols_to_keep = list(potential_names.keys())
+            for col in user_cols_to_keep:
+                if col not in df.columns:
+                    df[col] = ''
+                    
+            df = df[user_cols_to_keep] # Select and order columns
+            
+            # Data Type Conversions and Cleaning
+            df['Data Julgamento'] = pd.to_datetime(df['Data Julgamento'], errors='coerce')
+            df.dropna(subset=['Data Julgamento'], inplace=True)
+            df['ano_julgamento'] = df['Data Julgamento'].dt.year
+            df['mes_julgamento'] = df['Data Julgamento'].dt.month
+            df['ano_mes_julgamento'] = df['Data Julgamento'].dt.strftime('%Y-%m')
+            
+            text_cols = ['Título', 'Tese Julgado', 'Resumo', 'Ramo Direito', 'Matéria', 'Tema RG', 'Legislação', 'Notícia Completa', 'Classe Processo']
+            for col in text_cols:
+                if col in df.columns:
+                    df[col] = df[col].fillna('').astype(str)
+                else:
+                    df[col] = '' # Ensure column exists as string
+                    
+            if 'Informativo' in df.columns:
+                 df['Informativo'] = pd.to_numeric(df['Informativo'], errors='coerce')
+                 df['Informativo'] = df['Informativo'].astype('Int64').astype(str).replace('<NA>', '')
+            else:
+                df['Informativo'] = ''
+                
+            if 'Repercussão Geral' in df.columns:
+                df['Repercussão Geral'] = df['Repercussão Geral'].fillna('Não Informado').astype(str).str.strip().str.capitalize()
+                df['Repercussão Geral'] = df['Repercussão Geral'].replace({'Nao': 'Não'}, regex=False)
+                valid_rg_values = ['Sim', 'Não', 'Não Informado']
+                df.loc[~df['Repercussão Geral'].isin(valid_rg_values), 'Repercussão Geral'] = 'Não Informado'
+            else:
+                df['Repercussão Geral'] = 'Não Informado'
+                
+            df['id'] = range(len(df))
+            df['id'] = df['id'].astype(str)
+            
+            # Process 'Ramo Direito' - Ensure it's a list of strings
+            if 'Ramo Direito' in df.columns:
+                df['Ramo Direito'] = df['Ramo Direito'].apply(lambda x: [item.strip() for item in str(x).split(';') if item.strip()])
+            else:
+                 df['Ramo Direito'] = [[] for _ in range(len(df))]
+                 
+            # Keep the original DataFrame before exploding for unique ID operations
+            df_original = df.copy()
+            
+            # Explode only if the column exists and has lists
+            if 'Ramo Direito' in df.columns and df['Ramo Direito'].apply(isinstance, args=(list,)).any():
+                df_exploded = df.explode('Ramo Direito')
+                df_exploded['Ramo Direito'] = df_exploded['Ramo Direito'].fillna('') # Fill NaNs created by explode
+            else:
+                df_exploded = df # No explosion needed or possible
+                if 'Ramo Direito' not in df_exploded.columns:
+                     df_exploded['Ramo Direito'] = '' # Ensure column exists
+                else:
+                     df_exploded['Ramo Direito'] = df_exploded['Ramo Direito'].fillna('')
+                     
+            # Filter by year range after processing
+            df_exploded = df_exploded[(df_exploded['ano_julgamento'] >= 2021) & (df_exploded['ano_julgamento'] <= 2025)]
+            
+            return df_exploded, df_original
+        except FileNotFoundError:
+            st.error(f"Erro: Arquivo Excel não encontrado em {excel_path}")
+            return None, None
+        except ValueError as ve:
+            st.error(f"Erro de Valor: {ve}")
+            return None, None
+        except Exception as e:
+            st.error(f"Erro ao carregar ou processar os dados do Excel: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return None, None
 # --- Load CSS --- 
 def load_css(file_name):
     try:
@@ -163,126 +282,6 @@ def show_registration_form():
                 st.success("Usuário registrado com sucesso! Você já pode fazer o login.")
                 st.info("Retornando à tela de login...")
                 # Consider adding a small delay or just letting the user switch tabs
-
-# --- Load Data (Moved to Main Scope) ---
-    @st.cache_data
-    def load_data(excel_path):
-        try:
-            df = pd.read_excel(excel_path)
-            # --- Data Cleaning and Preparation (Keep existing logic) ---
-            potential_names = {
-                'Informativo': ['Informativo', 'Numero do informativo', 'Número do Informativo'],
-                'Classe Processo': ['Classe Processo'],
-                'Data Julgamento': ['Data Julgamento', 'Data do Julgamento'],
-                'Título': ['Título', 'Titulo'],
-                'Tese Julgado': ['Tese Julgado', 'Tese do Julgado'],
-                'Resumo': ['Resumo'],
-                'Ramo Direito': ['Ramo Direito', 'Ramo do Direito'],
-                'Matéria': ['Matéria', 'Materia'],
-                'Repercussão Geral': ['Repercussão Geral', 'Repercussao Geral'],
-                'Tema RG': ['Tema RG', 'Tema de RG', 'Tema Repercussão Geral'],
-                'Legislação': ['Legislação', 'Legislacao'],
-                'Notícia Completa': ['Notícia Completa', 'Noticia Completa', 'Notícia completa']
-            }
-            actual_cols = {}
-            missing_essential = []
-            essential_user_cols = ['Classe Processo', 'Data Julgamento', 'Título', 'Tese Julgado', 'Resumo', 'Ramo Direito', 'Matéria', 'Repercussão Geral', 'Notícia Completa']
-            for target_name, possible_names in potential_names.items():
-                found = False
-                for name in possible_names:
-                    if name in df.columns:
-                        actual_cols[target_name] = name
-                        found = True
-                        break
-                if not found:
-                    # If essential, mark as missing, otherwise create empty
-                    if target_name in essential_user_cols:
-                        missing_essential.append(target_name)
-                    df[target_name] = '' # Create empty column
-                elif actual_cols[target_name] != target_name:
-                    # Rename found column to target name
-                    df.rename(columns={actual_cols[target_name]: target_name}, inplace=True)
-            
-            # Check for critical missing columns
-            if 'Data Julgamento' in missing_essential:
-                 raise ValueError("Erro Crítico: Coluna essencial 'Data Julgamento' não encontrada no Excel.")
-            elif missing_essential:
-                 st.warning(f"Aviso: Colunas essenciais não encontradas e criadas vazias: {', '.join(missing_essential)}. Algumas funcionalidades podem ser afetadas.")
-            
-            # Ensure all target columns exist, even if empty
-            user_cols_to_keep = list(potential_names.keys())
-            for col in user_cols_to_keep:
-                if col not in df.columns:
-                    df[col] = ''
-                    
-            df = df[user_cols_to_keep] # Select and order columns
-            
-            # Data Type Conversions and Cleaning
-            df['Data Julgamento'] = pd.to_datetime(df['Data Julgamento'], errors='coerce')
-            df.dropna(subset=['Data Julgamento'], inplace=True)
-            df['ano_julgamento'] = df['Data Julgamento'].dt.year
-            df['mes_julgamento'] = df['Data Julgamento'].dt.month
-            df['ano_mes_julgamento'] = df['Data Julgamento'].dt.strftime('%Y-%m')
-            
-            text_cols = ['Título', 'Tese Julgado', 'Resumo', 'Ramo Direito', 'Matéria', 'Tema RG', 'Legislação', 'Notícia Completa', 'Classe Processo']
-            for col in text_cols:
-                if col in df.columns:
-                    df[col] = df[col].fillna('').astype(str)
-                else:
-                    df[col] = '' # Ensure column exists as string
-                    
-            if 'Informativo' in df.columns:
-                 df['Informativo'] = pd.to_numeric(df['Informativo'], errors='coerce')
-                 df['Informativo'] = df['Informativo'].astype('Int64').astype(str).replace('<NA>', '')
-            else:
-                df['Informativo'] = ''
-                
-            if 'Repercussão Geral' in df.columns:
-                df['Repercussão Geral'] = df['Repercussão Geral'].fillna('Não Informado').astype(str).str.strip().str.capitalize()
-                df['Repercussão Geral'] = df['Repercussão Geral'].replace({'Nao': 'Não'}, regex=False)
-                valid_rg_values = ['Sim', 'Não', 'Não Informado']
-                df.loc[~df['Repercussão Geral'].isin(valid_rg_values), 'Repercussão Geral'] = 'Não Informado'
-            else:
-                df['Repercussão Geral'] = 'Não Informado'
-                
-            df['id'] = range(len(df))
-            df['id'] = df['id'].astype(str)
-            
-            # Process 'Ramo Direito' - Ensure it's a list of strings
-            if 'Ramo Direito' in df.columns:
-                df['Ramo Direito'] = df['Ramo Direito'].apply(lambda x: [item.strip() for item in str(x).split(';') if item.strip()])
-            else:
-                 df['Ramo Direito'] = [[] for _ in range(len(df))]
-                 
-            # Keep the original DataFrame before exploding for unique ID operations
-            df_original = df.copy()
-            
-            # Explode only if the column exists and has lists
-            if 'Ramo Direito' in df.columns and df['Ramo Direito'].apply(isinstance, args=(list,)).any():
-                df_exploded = df.explode('Ramo Direito')
-                df_exploded['Ramo Direito'] = df_exploded['Ramo Direito'].fillna('') # Fill NaNs created by explode
-            else:
-                df_exploded = df # No explosion needed or possible
-                if 'Ramo Direito' not in df_exploded.columns:
-                     df_exploded['Ramo Direito'] = '' # Ensure column exists
-                else:
-                     df_exploded['Ramo Direito'] = df_exploded['Ramo Direito'].fillna('')
-                     
-            # Filter by year range after processing
-            df_exploded = df_exploded[(df_exploded['ano_julgamento'] >= 2021) & (df_exploded['ano_julgamento'] <= 2025)]
-            
-            return df_exploded, df_original
-        except FileNotFoundError:
-            st.error(f"Erro: Arquivo Excel não encontrado em {excel_path}")
-            return None, None
-        except ValueError as ve:
-            st.error(f"Erro de Valor: {ve}")
-            return None, None
-        except Exception as e:
-            st.error(f"Erro ao carregar ou processar os dados do Excel: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return None, None
 
 # Inicializa as variáveis com valores padrão
 df_informativos_exploded, df_informativos_original = None, None
