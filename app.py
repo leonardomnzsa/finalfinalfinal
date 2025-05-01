@@ -164,8 +164,14 @@ def show_registration_form():
                 st.info("Retornando à tela de login...")
                 # Consider adding a small delay or just letting the user switch tabs
 
-# --- Display Login/Registration or Main App --- 
+# Inicializa as variáveis com valores padrão
+df_informativos_exploded, df_informativos_original = None, None
 
+# Carrega os dados necessários
+data_path = "Dados_InformativosSTF_2021-2025.xlsx"
+df_informativos_exploded, df_informativos_original = load_data(data_path)
+
+# --- Display Login/Registration or Main App --- 
 if not st.session_state.logged_in:
     # Display Logo Centered on Login Page
     logo_path = "logo.png"
@@ -181,13 +187,6 @@ if not st.session_state.logged_in:
         show_login_form()
     with register_tab:
         show_registration_form()
-
-# Inicializa as variáveis com valores padrão
-df_informativos_exploded, df_informativos_original = None, None
-
-# Carrega os dados necessários
-data_path = "Dados_InformativosSTF_2021-2025.xlsx"
-df_informativos_exploded, df_informativos_original = load_data(data_path)
 
 else:
     # --- Main App Logic (User is Logged In) ---
