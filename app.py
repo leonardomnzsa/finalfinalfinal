@@ -385,7 +385,6 @@ if st.session_state.logged_in:
                     selected_rg = 'Todos'
                     show_unread_only = False
                     date_filter_type = "Ano"
-        no"
         
         # --- Main Content Area --- 
         if df_informativos_exploded is not None and df_informativos_original is not None:
