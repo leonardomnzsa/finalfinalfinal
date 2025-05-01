@@ -17,12 +17,11 @@ import openai
 # --- OpenAI API Key Configuration ---
 openai_api_key = None
 try:
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+if openai_api_key:
     openai.api_key = openai_api_key
-except KeyError:
-    pass # Handled later if needed
-except Exception as e:
-    print(f"An error occurred loading OpenAI API Key: {str(e)}")
+else:
+    raise Exception("Chave da API não configurada.")
 
 # --- Page Config ---
 st.set_page_config(
