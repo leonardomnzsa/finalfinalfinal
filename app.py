@@ -396,35 +396,51 @@ if df_informativos_exploded is not None and df_informativos_original is not None
         st.session_state.selected_julgado_id_assertiva = None
     if 'selected_julgado_id_caso' not in st.session_state:
         st.session_state.selected_julgado_id_caso = None
-    if 'selected_julgado_id_pergunta' not in st.session_state: # NEW: For questions
+    if 'selected_julgado_id_pergunta' not in st.session_state:  # NEW: For questions
         st.session_state.selected_julgado_id_pergunta = None
     if 'show_caso_pratico_dialog' not in st.session_state:
         st.session_state.show_caso_pratico_dialog = False
-    if 'caso_pratico_content' not in st.session_state: # NEW: To store generated content for dialog
+    if 'caso_pratico_content' not in st.session_state:  # NEW: To store generated content for dialog
         st.session_state.caso_pratico_content = None
-    if 'caso_pratico_error' not in st.session_state: # NEW: To store potential errors for dialog
+    if 'caso_pratico_error' not in st.session_state:  # NEW: To store potential errors for dialog
         st.session_state.caso_pratico_error = None
     if 'selected_meta_julgado_id' not in st.session_state:
         st.session_state.selected_meta_julgado_id = None
-    if 'informativos_page_number' not in st.session_state: # NEW: For pagination
+    if 'informativos_page_number' not in st.session_state:  # NEW: For pagination
         st.session_state.informativos_page_number = 0
-    if 'informativos_items_per_page' not in st.session_state: # NEW: For pagination items per page
+    if 'informativos_items_per_page' not in st.session_state:  # NEW: For pagination items per page
         st.session_state.informativos_items_per_page = 10
 
-    # --- Logo at the very top of the main content area --- 
+    # --- Logo at the very top of the main content area ---
     logo_path = "logo.png"
     if os.path.exists(logo_path):
         # Use columns to potentially center or control width
-        col_logo_left, col_logo_center, col_logo_right = st.columns([1, 2, 1]) # Adjust ratios as needed
+        col_logo_left, col_logo_center, col_logo_right = st.columns([1, 2, 1])  # Adjust ratios as needed
         with col_logo_center:
-             st.image(logo_path, use_container_width=True) # Changed from use_column_width="auto"
+            st.image(logo_path, use_container_width=True)  # Changed from use_column_width="auto"
     else:
         st.warning("Arquivo de logo 'logo.png' não encontrado.")
-    st.divider() # Add a divider below the logo
+    st.divider()  # Add a divider below the logo
 
-    # --- Filtering Logic --- 
+    # --- Filtering Logic ---
     # Start with the original (non-exploded) dataframe for unique julgados
     df_filtrado_unique = df_informativos_original.copy()
+
+    # Correção: Garantir variáveis padrão caso não definidas pelo sidebar
+    if 'date_filter_type' not in locals():
+        date_filter_type = "Ano"
+    if 'selected_anos' not in locals():
+        selected_anos = []
+    if 'selected_meses_anos' not in locals():
+        selected_meses_anos = []
+    if 'selected_ramos' not in locals():
+        selected_ramos = []
+    if 'selected_classes' not in locals():
+        selected_classes = []
+    if 'selected_rg' not in locals():
+        selected_rg = 'Todos'
+    if 'read_status_filter' not in locals():
+        read_status_filter = "Todos"
 
     # Apply main filters from sidebar
     if date_filter_type == "Ano" and selected_anos:
@@ -434,12 +450,14 @@ if df_informativos_exploded is not None and df_informativos_original is not None
     
     # Filter by Ramo Direito (check if any selected ramo is in the list for the row)
     if selected_ramos:
-         df_filtrado_unique = df_filtrado_unique[df_filtrado_unique['Ramo Direito'].apply(lambda ramos: any(ramo in selected_ramos for ramo in ramos))]
+        df_filtrado_unique = df_filtrado_unique[df_filtrado_unique['Ramo Direito'].apply(
+            lambda ramos: any(ramo in selected_ramos for ramo in ramos))]
          
     if selected_classes:
         df_filtrado_unique = df_filtrado_unique[df_filtrado_unique['Classe Processo'].isin(selected_classes)]
     if selected_rg != 'Todos':
         df_filtrado_unique = df_filtrado_unique[df_filtrado_unique['Repercussão Geral'] == selected_rg]
+    
     # Apply read status filter
     if read_status_filter == "Apenas Não Lidos":
         df_filtrado_unique = df_filtrado_unique[~df_filtrado_unique["id"].isin(read_ids)]
@@ -449,30 +467,11 @@ if df_informativos_exploded is not None and df_informativos_original is not None
 
     df_filtrado_unique = df_filtrado_unique.sort_values(by="Data Julgamento", ascending=False)
 
-    # --- Search Functionality (Moved to Informativos Tab) --- 
-    # search_term = st.text_input("Buscar por palavra-chave no Título ou Matéria", key="search_box", placeholder="Digite aqui para buscar...")
-    # if search_term:
-    #     search_term_lower = search_term.lower()
-    #     # Ensure columns exist before searching
-    #     search_cols = [col for col in ['Título', 'Matéria'] if col in df_filtrado_unique.columns]
-    #     if search_cols:
-    #         # Build filter dynamically
-    #         filter_condition = None
-    #         for col in search_cols:
-    #             condition = df_filtrado_unique[col].str.lower().str.contains(search_term_lower, regex=False, na=False)
-    #             if filter_condition is None:
-    #                 filter_condition = condition
-    #             else:
-    #                 filter_condition |= condition
-    #         if filter_condition is not None:
-    #             df_filtrado_unique = df_filtrado_unique[filter_condition]
-    #     else:
-    #         st.warning("Colunas 'Título' ou 'Matéria' não encontradas para busca.")
+    # --- Tabs ---
+    tab_informativos, tab_assertivas, tab_perguntas, tab_metas = st.tabs(
+        ["Informativos", "Assertivas", "Perguntas", "Metas de Leitura"])
 
-    # --- Tabs --- 
-    tab_informativos, tab_assertivas, tab_perguntas, tab_metas = st.tabs(["Informativos", "Assertivas", "Perguntas", "Metas de Leitura"])
-
-    # --- Dialog for Caso Prático (Must be outside tabs) --- 
+    # --- Dialog for Caso Prático (Must be outside tabs) ---
     if st.session_state.show_caso_pratico_dialog:
         @st.dialog("Caso Prático (RESULT)")
         def show_caso_pratico():
@@ -482,13 +481,11 @@ if df_informativos_exploded is not None and df_informativos_original is not None
                 st.markdown(st.session_state.caso_pratico_content)
             else:
                 # If content/error not ready yet, show spinner (or message)
-                st.spinner("Gerando caso prático...") 
-                # Ideally, generation is triggered before dialog opens, 
-                # but this handles cases where it might still be running.
+                st.spinner("Gerando caso prático...")
             
             if st.button("Fechar", key="close_caso_dialog"):
                 st.session_state.show_caso_pratico_dialog = False
-                st.session_state.selected_julgado_id_caso = None # Clear selection
+                st.session_state.selected_julgado_id_caso = None  # Clear selection
                 st.session_state.caso_pratico_content = None
                 st.session_state.caso_pratico_error = None
                 st.rerun()
