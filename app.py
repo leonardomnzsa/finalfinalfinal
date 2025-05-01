@@ -182,6 +182,13 @@ if not st.session_state.logged_in:
     with register_tab:
         show_registration_form()
 
+# Inicializa as variáveis com valores padrão
+df_informativos_exploded, df_informativos_original = None, None
+
+# Carrega os dados necessários
+data_path = "Dados_InformativosSTF_2021-2025.xlsx"
+df_informativos_exploded, df_informativos_original = load_data(data_path)
+
 else:
     # --- Main App Logic (User is Logged In) ---
     current_username = st.session_state.username
