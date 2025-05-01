@@ -147,6 +147,7 @@ st.set_page_config(
             import traceback
             traceback.print_exc()
             return None, None
+            
 # --- Load CSS --- 
 def load_css(file_name):
     try:
