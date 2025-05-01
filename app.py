@@ -164,40 +164,7 @@ def show_registration_form():
                 st.info("Retornando à tela de login...")
                 # Consider adding a small delay or just letting the user switch tabs
 
-# Inicializa as variáveis com valores padrão
-df_informativos_exploded, df_informativos_original = None, None
-
-# Carrega os dados necessários
-data_path = "Dados_InformativosSTF_2021-2025.xlsx"
-df_informativos_exploded, df_informativos_original = load_data(data_path)
-
-# --- Display Login/Registration or Main App --- 
-if not st.session_state.logged_in:
-    # Display Logo Centered on Login Page
-    logo_path = "logo.png"
-    if os.path.exists(logo_path):
-        col1_logo, col2_logo, col3_logo = st.columns([1,1,1])
-        with col2_logo:
-             st.image(logo_path, width=200) # Adjust width as needed
-    else:
-        st.warning("Arquivo de logo 'logo.png' não encontrado.")
-
-    login_tab, register_tab = st.tabs(["Login", "Registrar"])
-    with login_tab:
-        show_login_form()
-    with register_tab:
-        show_registration_form()
-
-else:
-    # --- Main App Logic (User is Logged In) ---
-    current_username = st.session_state.username
-    current_name = st.session_state.name
-
-    # --- Load User Specific Data --- 
-    user_data = load_user_data(current_username)
-    read_ids = user_data.get("read_ids", set())
-
-    # --- Load Data (Moved to Main Scope) ---
+# --- Load Data (Moved to Main Scope) ---
     @st.cache_data
     def load_data(excel_path):
         try:
@@ -316,6 +283,39 @@ else:
             import traceback
             traceback.print_exc()
             return None, None
+
+# Inicializa as variáveis com valores padrão
+df_informativos_exploded, df_informativos_original = None, None
+
+# Carrega os dados necessários
+data_path = "Dados_InformativosSTF_2021-2025.xlsx"
+df_informativos_exploded, df_informativos_original = load_data(data_path)
+
+# --- Display Login/Registration or Main App --- 
+if not st.session_state.logged_in:
+    # Display Logo Centered on Login Page
+    logo_path = "logo.png"
+    if os.path.exists(logo_path):
+        col1_logo, col2_logo, col3_logo = st.columns([1,1,1])
+        with col2_logo:
+             st.image(logo_path, width=200) # Adjust width as needed
+    else:
+        st.warning("Arquivo de logo 'logo.png' não encontrado.")
+
+    login_tab, register_tab = st.tabs(["Login", "Registrar"])
+    with login_tab:
+        show_login_form()
+    with register_tab:
+        show_registration_form()
+
+else:
+    # --- Main App Logic (User is Logged In) ---
+    current_username = st.session_state.username
+    current_name = st.session_state.name
+
+    # --- Load User Specific Data --- 
+    user_data = load_user_data(current_username)
+    read_ids = user_data.get("read_ids", set())
 
     # Inicializa as variáveis com valores padrão
     df_informativos_exploded = None
