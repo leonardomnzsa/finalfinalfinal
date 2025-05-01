@@ -892,5 +892,5 @@ if df_informativos_exploded is not None and df_informativos_original is not None
                                 st.rerun()
                         st.divider()
     
-    else:
-        st.error("Falha ao carregar os dados dos informativos. A aplicação não pode continuar.")
+else:
+    st.error("Falha ao carregar os dados dos informativos. A aplicação não pode continuar.")
