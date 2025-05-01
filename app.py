@@ -386,9 +386,9 @@ else:
 # as their placement was incorrect. Filter defaults should be handled within the sidebar logic.
 
 # --- Main Content Area ---
-if df_informativos_exploded is not None and df_informativos_original is not None:
-    # Initialize session state for other selections
-    if 'selected_julgado_id_assertiva' not in st.session_state:
+    if df_informativos_exploded is not None and df_informativos_original is not None:
+        # Initialize session state for other selections
+        if 'selected_julgado_id_assertiva' not in st.session_state:
             st.session_state.selected_julgado_id_assertiva = None
         if 'selected_julgado_id_caso' not in st.session_state:
             st.session_state.selected_julgado_id_caso = None
