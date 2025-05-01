@@ -29,12 +29,12 @@ st.set_page_config(
 )
 
 # --- Load Data (Moved to Main Scope) ---
-    @st.cache_data
-    def load_data(excel_path):
-        try:
-            df = pd.read_excel(excel_path)
-            # --- Data Cleaning and Preparation (Keep existing logic) ---
-            potential_names = {
+@st.cache_data
+def load_data(excel_path):
+    try:
+        df = pd.read_excel(excel_path)
+        # --- Data Cleaning and Preparation (Keep existing logic) ---
+         potential_names = {
                 'Informativo': ['Informativo', 'Numero do informativo', 'Número do Informativo'],
                 'Classe Processo': ['Classe Processo'],
                 'Data Julgamento': ['Data Julgamento', 'Data do Julgamento'],
