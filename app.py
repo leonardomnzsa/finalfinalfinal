@@ -15,13 +15,10 @@ import csv # For CSV report
 import openai
 
 # --- OpenAI API Key Configuration ---
-openai_api_key = None
-try:
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-if openai_api_key:
-    openai.api_key = openai_api_key
-else:
-    raise Exception("Chave da API não configurada.")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise Exception("OPENAI_API_KEY não configurada.")
+openai.api_key = openai_api_key
 
 # --- Page Config ---
 st.set_page_config(
