@@ -1,0 +1,238 @@
+/* Import Montserrat font */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+/* Apply base styles */
+body {
+    font-family: 'Montserrat', sans-serif;
+    color: #FFFFFF; /* White text */
+    background-color: #000000; /* Black background */
+}
+
+/* Ensure Streamlit overrides use the theme colors */
+div[data-testid="stAppViewContainer"], 
+div[data-testid="stHeader"], 
+div[data-testid="stToolbar"] {
+    background-color: #000000 !important; /* Black background */
+}
+
+div[data-testid="stSidebar"] {
+    background-color: #1E1E1E !important; /* Dark gray sidebar */
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    color: #FFFFFF; /* White headings */
+    font-weight: 600; /* Slightly bolder */
+}
+
+h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+h2 { font-size: 2rem; margin-bottom: 0.8rem; }
+h3 { font-size: 1.75rem; margin-bottom: 0.7rem; }
+
+/* Paragraphs */
+p, div[data-testid="stMarkdownContainer"] p, li {
+    font-family: 'Montserrat', sans-serif;
+    color: #E0E0E0; /* Slightly off-white for better readability */
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* Links */
+a {
+    color: #E8C061; /* Gold links */
+    text-decoration: none; /* Remove underline */
+}
+a:hover {
+    color: #FAD083; /* Lighter gold on hover */
+    text-decoration: underline;
+}
+
+/* Buttons (General) - Ensure Black & Bold Text */
+div[data-testid="stButton"] > button {
+    background-color: #E8C061; /* Gold background */
+    color: #000000 !important; /* Black text, !important to override potential conflicts */
+    border: none;
+    border-radius: 8px; /* Rounded corners */
+    padding: 10px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700 !important; /* Bold text, !important to ensure override */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(232, 192, 97, 0.3); /* Subtle gold shadow */
+}
+div[data-testid="stButton"] > button:hover {
+    background-color: #FAD083; /* Lighter gold on hover */
+    color: #000000; /* Keep text black on hover */
+    transform: translateY(-1px);
+}
+div[data-testid="stButton"] > button:active {
+    background-color: #D4AC57; /* Darker gold when pressed */
+    transform: translateY(0px);
+}
+/* Explicitly target RESULT buttons if needed, but general rule should suffice */
+/* .result-button-class { color: #000000 !important; font-weight: 700 !important; } */
+
+/* Cards (using st.expander as a base) - 3D effect */
+div[data-testid="stExpander"] {
+    border: none !important; /* Remove default border */
+    background-color: #1E1E1E !important; /* Dark gray background for card */
+    border-radius: 12px !important; /* More rounded corners */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), /* Main shadow */
+                0 4px 8px rgba(232, 192, 97, 0.1); /* Subtle gold glow */
+    margin-bottom: 20px !important; /* Spacing between cards */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+div[data-testid="stExpander"]:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5),
+                0 6px 12px rgba(232, 192, 97, 0.15);
+}
+
+div[data-testid="stExpander"] > details > summary {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: #FFFFFF !important; /* White title for expander */
+    padding: 15px 20px;
+    background-color: #1E1E1E !important; /* Ensure summary bg matches */
+    border-radius: 12px 12px 0 0; /* Round top corners */
+}
+
+div[data-testid="stExpander"] > details[open] > summary {
+     border-bottom: 1px solid #333333;
+     border-radius: 12px 12px 0 0; /* Keep top corners rounded when open */
+}
+
+div[data-testid="stExpander"] > details > summary svg {
+    fill: #E8C061 !important; /* Gold chevron */
+}
+
+div[data-testid="stExpander"] > details > div[data-testid="stVerticalBlock"] {
+    padding: 20px !important; /* Padding inside the card content */
+    background-color: #1E1E1E !important; /* Ensure content area matches */
+    border-radius: 0 0 12px 12px !important; /* Match bottom corners */
+    border-top: none !important; /* Remove potential top border */
+}
+
+/* Adjust input/select widgets */
+div[data-testid="stTextInput"] input,
+div[data-testid="stNumberInput"] input,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {
+    border: 1px solid #555555 !important;
+    background-color: #101010 !important; /* Slightly darker input bg */
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+}
+div[data-testid="stTextInput"] input:focus,
+div[data-testid="stNumberInput"] input:focus,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within,
+div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div:focus-within {
+    border-color: #E8C061 !important;
+    box-shadow: 0 0 0 2px rgba(232, 192, 97, 0.3) !important;
+}
+
+/* Style Streamlit's main menu button (attempt) */
+div[data-testid="stMainMenu"] button {
+   background-color: transparent !important;
+   border: 1px solid #E8C061 !important;
+   color: #E8C061 !important;
+}
+div[data-testid="stMainMenu"] button:hover {
+    background-color: rgba(232, 192, 97, 0.1) !important;
+    color: #FAD083 !important;
+}
+
+/* Style scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #101010;
+}
+::-webkit-scrollbar-thumb {
+    background: #555555;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #E8C061;
+}
+
+/* Class for highlighted text */
+.highlight {
+    color: #E8C061;
+    font-weight: 600;
+}
+
+/* Specific adjustments for better layout */
+div[data-testid="stHorizontalBlock"] { /* Ensure horizontal blocks align well */
+    align-items: center;
+}
+
+/* Logo styling - adjust margin if needed */
+img.app-logo {
+    margin-bottom: 1rem; /* Add some space below the logo */
+    max-width: 200px; /* Limit logo width */
+}
+
+/* --- Filtros (Remover fundo amarelo indesejado) --- */
+
+/* Radio Buttons */
+/* Remove fundo amarelo do LABEL do radio selecionado */
+div[data-testid="stRadio"] label span {
+    background-color: transparent !important; /* Remove qualquer fundo do span do label */
+    color: #FFFFFF !important; /* Garante texto branco por padrão */
+}
+div[data-testid="stRadio"] label:has(input[type="radio"]:checked) span {
+    color: #FFFFFF !important; /* Mantém texto branco mesmo quando selecionado */
+    background-color: transparent !important; /* Garante fundo transparente também no selecionado */
+}
+/* Estilo do CÍRCULO do radio selecionado (mantém dourado com miolo preto) */
+div[data-testid="stRadio"] input[type="radio"]:checked + div {
+    background-color: #E8C061 !important;
+    border-color: #E8C061 !important;
+}
+div[data-testid="stRadio"] input[type="radio"]:checked + div::after {
+    background-color: #000000 !important;
+}
+
+/* Multiselect Tags (Anos selecionados, etc.) - Ensure Black Text */
+div[data-testid="stMultiSelect"] span[data-baseweb="tag"] {
+    background-color: #E8C061 !important; /* Garante fundo dourado */
+    color: #000000 !important; /* Garante texto preto */
+    font-weight: 600 !important; /* Deixa o texto um pouco mais forte */
+    border-radius: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* --- Menu Superior (Tabs) - Centralizado, Maior, Negrito --- */
+div[data-testid="stTabs"] {
+    width: 100%; /* Ocupa a largura */
+    display: flex;
+    justify-content: center; /* Centraliza os botões das tabs */
+    margin-bottom: 1rem; /* Espaço abaixo */
+}
+
+div[data-testid="stTabs"] button[data-baseweb="tab"] {
+    font-size: 1.2rem !important; /* Tamanho um pouco maior */
+    font-weight: 700 !important; /* Mais Negrito */
+    color: #AAAAAA !important; /* Cinza claro para não selecionado */
+    padding-left: 25px !important; /* Mais espaçamento horizontal */
+    padding-right: 25px !important;
+    padding-top: 10px !important; /* Mais espaçamento vertical */
+    padding-bottom: 10px !important;
+}
+
+div[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+    color: #FFFFFF !important; /* Branco para selecionado */
+    border-bottom-color: #E8C061 !important; /* Linha dourada embaixo */
+}
+
+
+/* Forçar texto preto em botões dentro dos cards (expander) */
+div[data-testid="stExpander"] div[data-testid="stButton"] > button {
+    color: #000000 !important; /* Força texto preto */
+    font-weight: 700 !important; /* Garante negrito também */
+}
+
