@@ -236,3 +236,9 @@ div[data-testid="stExpander"] div[data-testid="stButton"] > button {
     font-weight: 700 !important; /* Garante negrito também */
 }
 
+
+/* Tentativa 1: Forçar texto preto no SPAN dentro do botão no expander */
+div[data-testid="stExpander"] div[data-testid="stButton"] > button span {
+    color: #000000 !important;
+}
+
